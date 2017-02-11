@@ -7,7 +7,8 @@
     "start": "node_modules/.bin/electron .",
     "pack": "build --dir",
     "dist": "build",
-    "rebuild": "electron-rebuild -f -w serialport"
+    "rebuild": "electron-rebuild -f -w serialport",
+    "test": "mocha --require babel-register"
   },
   "author": "",
   "license": "ISC",
@@ -22,15 +23,18 @@
     "serialport": "^4.0.7"
   },
   "devDependencies": {
+    "babel-register": "^6.22.0",
     "electron-compilers": "^5.4.0",
     "electron-installer-dmg": "^0.2.0",
     "electron-packager": "^8.5.1",
     "electron-prebuilt-compile": "^1.4.15",
     "electron-rebuild": "^1.5.7",
     "electron-winstaller": "^2.5.2",
+    "mocha": "^3.2.0",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
-    "redux-devtools": "^3.3.2"
+    "redux-devtools": "^3.3.2",
+    "babel-preset-stage-0": "^6.22.0"
   },
   "build": {
     "appId": "me.sergeyyanchi.smartserialapp"
