@@ -1,0 +1,39 @@
+{
+  "name": "serial-port",
+  "version": "1.0.0",
+  "description": "Smart Serial Port application",
+  "main": "./src/es6-init.js",
+  "scripts": {
+    "start": "node_modules/.bin/electron .",
+    "pack": "build --dir",
+    "dist": "build",
+    "rebuild": "electron-rebuild -f -w serialport"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "electron-compile": "^5.1.3",
+    "react-bootstrap": "^0.30.7",
+    "react-desktop": "^0.2.17",
+    "react-redux": "^5.0.2",
+    "redux": "^3.6.0",
+    "redux-logger": "^2.8.1",
+    "redux-thunk": "^2.2.0",
+    "serialport": "^4.0.7"
+  },
+  "devDependencies": {
+    "electron-compilers": "^5.4.0",
+    "electron-installer-dmg": "^0.2.0",
+    "electron-packager": "^8.5.1",
+    "electron-prebuilt-compile": "^1.4.15",
+    "electron-rebuild": "^1.5.7",
+    "electron-winstaller": "^2.5.2",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "redux-devtools": "^3.3.2"
+  },
+  "build": {
+    "appId": "me.sergeyyanchi.smartserialapp"
+  },
+  "postinstall": "install-app-deps"
+}
