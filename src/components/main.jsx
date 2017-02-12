@@ -1,56 +1,46 @@
 'use strict';
 
 import React, { Component } from 'react';
+import { connect } from 'react-redux'
 import CommandInput from './commandinput';
+import Header from './header';
 import Footer from './footer';
 import Logs from '../containers/logs'
 import {Grid, FormControl, ButtonToolbar, InputGroup, Button, Navbar, DropdownButton, MenuItem, Panel, Row, ButtonGroup} from 'react-bootstrap';
 
 
-export class Main extends Component {
+class Main extends Component {
 
-  constructor()
+  constructor({dispatch})
   {
     super()
+
+    this.dispatch = dispatch
+    this.serialport = null
+  }
+
+  componentDidMount()
+  {
+    this.dispatch(this.props.serialport.list())
   }
 
   render() {
     return (
       <div>
-        <Footer>
-        </Footer>
+        <Header>
+        </Header>
         <Grid fluid className="body">
         <CommandInput className="body">
         </CommandInput>
         <Logs>
         </Logs>
         </Grid>
-         <Navbar fixedBottom fluid>
-          <Navbar.Header>
-            <Navbar.Brand>
-              Status: Connected
-            </Navbar.Brand>
-            <Navbar.Toggle />
-          </Navbar.Header>
-          <Navbar.Collapse>
-            <Navbar.Form pullRight>
-              <ButtonToolbar>
-                <ButtonGroup>
-                  <Button active>RTS</Button>
-                  <Button>DTS</Button>
-                </ButtonGroup>
-                <ButtonGroup>
-                  <Button>Auto Connect</Button>
-                </ButtonGroup>
-                <DropdownButton title="9600" id="bg-nested-dropdown">
-                  <MenuItem eventKey="1">9600</MenuItem>
-                  <MenuItem eventKey="2">115200</MenuItem>
-                </DropdownButton>
-              </ButtonToolbar>
-            </Navbar.Form>
-          </Navbar.Collapse>
-        </Navbar>
+         <Footer serialport={this.props.serialport} />
       </div>
     );
   }
 }
+
+Main = connect()(Main)
+
+export default Main

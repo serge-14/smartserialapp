@@ -8,8 +8,14 @@
     "suppressTaskName": true,
     "tasks": [
         {
+            "taskName": "test current file",
+            "suppressTaskName": true,
+            "args": ["run", "test:file", "${file}"],
+            "isTestCommand": true
+        },
+        {
             "taskName": "test",
-            "args": ["test"]
+            "args": ["run", "test"]
         }
     ]
 }

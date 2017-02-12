@@ -2,72 +2,63 @@
 
 import { connect } from 'react-redux'
 import React, { Component, PropTypes } from 'react';
-import { Navbar, Button, DropdownButton, MenuItem } from 'react-bootstrap';
-import {fetchAllSerialPorts, selectSerialPort} from '../actions';
+import {Grid, FormControl, ButtonToolbar, InputGroup, Button, Navbar, DropdownButton, MenuItem, Panel, Row, ButtonGroup} from 'react-bootstrap';
 
-class FooterImpl extends Component {
+class Footer extends Component {
 
-  constructor(props)
+  constructor({dispatch})
   {
-    super(props)
+    super()
+
+    this.dispatch = dispatch
   }
 
-  getActiveSerialPortName(port) {
-      return port == null ? "Select" : port.comName;
+  connect()
+  {
+      this.dispatch(this.props.serialport.connect(this.props.serialPorts.activePort))
   }
 
-  selectPort(port) {
-    this.props.dispatch(selectSerialPort(port))
-  }
-
-  serialPorts() {
-    if(this.props.serialPorts.isFetching ) {
-        return (
-            <Navbar.Collapse className="test">
-                <Button disabled>Loading...</Button>
-            </Navbar.Collapse>
-        )
-    }
-    else if(!this.props.serialPorts.isFetching && this.props.serialPorts.ports.length == 0) {
-        return (
-            <Navbar.Collapse className="test">
-                <Navbar.Form pullRight>
-                    <Button disabled>Not Available</Button>
-                </Navbar.Form>
-            </Navbar.Collapse>
-        )
-    }
-    else if(!this.props.serialPorts.isFetching && this.props.serialPorts.ports.length > 0) {
-        return (
-            <Navbar.Collapse className="test">
-                <Navbar.Form pullRight>
-                    <DropdownButton bsStyle="default" title={this.getActiveSerialPortName(this.props.serialPorts.activePort)} id="communicationPort">
-                        {this.props.serialPorts.ports.map((port, index) =>
-                            <MenuItem key={index} eventKey={index} onClick={this.selectPort.bind(this, port)} >{port.comName}</MenuItem>
-                        )}
-                    </DropdownButton>
-                </Navbar.Form>
-            </Navbar.Collapse>
-        )
-    }
+  disconnect()
+  {
+      this.dispatch(this.props.serialport.disconnect())
   }
 
   render() {
     return (
-    <Navbar fixedTop fluid>
+    <Navbar fixedBottom fluid>
         <Navbar.Header>
         <Navbar.Brand>
-            Serial Port
+            Status: {this.props.serialPorts.status}
         </Navbar.Brand>
         <Navbar.Toggle />
         </Navbar.Header>
-        {this.serialPorts()}
+        <Navbar.Collapse>
+        <Navbar.Form pullRight>
+            <ButtonToolbar>
+            <ButtonGroup>
+                <Button onClick={this.connect.bind(this)}>Connect</Button>
+                <Button>Disconnect</Button>
+            </ButtonGroup>
+            <ButtonGroup>
+                <Button active>RTS</Button>
+                <Button>DTS</Button>
+            </ButtonGroup>
+            <ButtonGroup>
+                <Button>Auto Connect</Button>
+            </ButtonGroup>
+            <DropdownButton title="9600" id="bg-nested-dropdown">
+                <MenuItem eventKey="1">9600</MenuItem>
+                <MenuItem eventKey="2">115200</MenuItem>
+            </DropdownButton>
+            </ButtonToolbar>
+        </Navbar.Form>
+        </Navbar.Collapse>
     </Navbar>
     );
   }
 }
 
-FooterImpl.propTypes = {
+Footer.propTypes = {
   serialPorts: PropTypes.shape({
     isFetching: PropTypes.bool.isRequired,
     ports: PropTypes.arrayOf(PropTypes.shape({
@@ -77,7 +68,8 @@ FooterImpl.propTypes = {
     activePort: PropTypes.shape({
         comName: PropTypes.string.isRequired,
         pnpId: PropTypes.string.isRequired
-    })
+    }),
+    status: PropTypes.string.isRequired
   }).isRequired
 }
 
@@ -85,8 +77,8 @@ const mapStateToProps = (state) => ({
   serialPorts: state.serialPorts
 })
 
-const Footer = connect(
+Footer = connect(
   mapStateToProps
-)(FooterImpl)
+)(Footer)
 
 export default Footer

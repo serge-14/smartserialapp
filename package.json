@@ -8,7 +8,8 @@
     "pack": "build --dir",
     "dist": "build",
     "rebuild": "electron-rebuild -f -w serialport",
-    "test": "mocha --require babel-register"
+    "test": "mocha --require babel-register ./src/**/*.spec.js",
+    "test:file": "mocha --silent --compilers js:babel-core/register --require babel-register --require babel-core/register --require babel-polyfill"
   },
   "author": "",
   "license": "ISC",
@@ -23,7 +24,13 @@
     "serialport": "^4.0.7"
   },
   "devDependencies": {
+    "babel-core": "^6.22.1",
+    "babel-loader": "^6.2.10",
+    "babel-polyfill": "^6.22.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-stage-0": "^6.22.0",
     "babel-register": "^6.22.0",
+    "chai": "^3.5.0",
     "electron-compilers": "^5.4.0",
     "electron-installer-dmg": "^0.2.0",
     "electron-packager": "^8.5.1",
@@ -33,8 +40,7 @@
     "mocha": "^3.2.0",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
-    "redux-devtools": "^3.3.2",
-    "babel-preset-stage-0": "^6.22.0"
+    "redux-devtools": "^3.3.2"
   },
   "build": {
     "appId": "me.sergeyyanchi.smartserialapp"
