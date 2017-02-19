@@ -68,7 +68,7 @@ describe('serial port wrapper', () => {
 
         sinon.assert.calledWith(dispatch, { type: 'LIST_SERIAL_PORTS' })
         sinon.assert.calledWith(dispatch, { type: 'RECEIVE_SERIAL_PORTS', ports: [] })
-        sinon.assert.calledWith(dispatch, { type: 'SET_ERROR', error: error })
+        sinon.assert.calledWith(dispatch, { type: 'SET_ERROR', error: 'an error' })
         sinon.assert.callCount(dispatch, 3)
     })
 
@@ -106,7 +106,7 @@ describe('serial port wrapper', () => {
 
         sinon.assert.calledWith(dispatch, { type: 'UPDATE_CONNECTION_STATUS', status: 'connecting' })
         sinon.assert.calledWith(dispatch, { type: 'UPDATE_CONNECTION_STATUS', status: 'disconnected' })
-        sinon.assert.calledWith(dispatch, { type: 'SET_ERROR', error: error })
+        sinon.assert.calledWith(dispatch, { type: 'SET_ERROR', error: 'an error' })
         sinon.assert.callCount(dispatch, 3)
 
         sinon.assert.calledWith(serialport.on, 'open')
@@ -158,6 +158,6 @@ describe('serial port wrapper', () => {
 
         sinon.assert.notCalled(serialport.close)
         sinon.assert.calledWith(dispatch, { type: 'UPDATE_CONNECTION_STATUS', status: 'disconnected' })
-        sinon.assert.calledWith(dispatch, { type: 'SET_ERROR', error: error })
+        sinon.assert.calledWith(dispatch, { type: 'SET_ERROR', error: 'an error' })
     })
 })
