@@ -10,12 +10,12 @@
         {
             "taskName": "test current file",
             "suppressTaskName": true,
-            "args": ["run", "test:file", "${file}"],
+            "args": ["run", "--silent", "test:file", "${file}"],
             "isTestCommand": true
         },
         {
             "taskName": "test",
-            "args": ["run", "test"]
+            "args": ["run", "--silent", "test"]
         }
     ]
 }

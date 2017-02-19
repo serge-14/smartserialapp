@@ -27,4 +27,16 @@ describe('connection reducer', () => {
         .baudRate.should.be
         .equal(115200)
     })
+
+    it('should reset connection', () => {
+
+    })
+
+    it('should select port', () => {
+
+    })
+
+    it('should update connection status', () => {
+
+    })
 })

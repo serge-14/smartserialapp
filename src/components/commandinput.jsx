@@ -6,7 +6,7 @@ import { FormControl, InputGroup, Button, Label } from 'react-bootstrap';
 import { addLog, updateLogStatus } from '../actions'
 import { DIRECTION_OUT, LOG_STATUS_SENT, LOG_STATUS_ERROR } from '../reducers/logs'
 
-class CommandInput extends Component {
+export class CommandInput extends Component {
 
     constructor({dispatch}) {
         super()
@@ -50,7 +50,7 @@ class CommandInput extends Component {
 
             this.dispatch(addLog(++this.nextId, DIRECTION_OUT, message))
 
-            this.props.serialport.write(message, 
+            this.props.serialport.write(message,
                 (err) => this.dispatch(updateLogStatus(this.nextId, err == null ? LOG_STATUS_SENT : LOG_STATUS_ERROR)))
 
             this.setState({ 
@@ -68,7 +68,7 @@ class CommandInput extends Component {
             })
     }
 
-     handleKeySown(event) {
+     handleKeyDown(event) {
         var key = event.keyCode || event.charCode;
 
         if( (key == 8 || key == 46) && this.state.text == '' )
@@ -96,9 +96,9 @@ class CommandInput extends Component {
             <InputGroup>
                 <InputGroup.Addon>Command:</InputGroup.Addon>
                 {groups}
-                <FormControl type="text" value={this.state.text} onChange={this.handleChange.bind(this)} onKeyPress={this.handleKeyPress.bind(this)} onKeyDown={this.handleKeySown.bind(this)} />
+                <FormControl id="command-text" type="text" value={this.state.text} onChange={this.handleChange.bind(this)} onKeyPress={this.handleKeyPress.bind(this)} onKeyDown={this.handleKeyDown.bind(this)} />
                 <InputGroup.Button>
-                    <Button onClick={this.send.bind(this)}>Send</Button>
+                    <Button id="command-send" onClick={this.send.bind(this)}>Send</Button>
                     <Button onClick={this.clear.bind(this)}>Clean</Button>
                 </InputGroup.Button>
             </InputGroup>
@@ -106,7 +106,4 @@ class CommandInput extends Component {
     }
 }
 
-
-CommandInput = connect()(CommandInput)
-
-export default CommandInput
+export default connect()(CommandInput)
