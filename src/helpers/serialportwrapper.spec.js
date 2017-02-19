@@ -1,217 +1,163 @@
 import mocha from 'mocha';
 import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+import sinon from 'sinon';
 import {SerialPortWrapper} from './serialportwrapper';
 
+chai.use(chaiAsPromised);
 chai.should();
 
-class MockSerialPort
+
+class serialportapi
 {
-    constructor(name, options)
-    {
-        name.should.be.equal(MockSerialPort.expectedPort)
-        options.should.be.deep.equal(MockSerialPort.expectedOptions)
+    isOpen(){}
 
-        this.isOpenValue = false
-    }
+    on(event, callback) {}
 
-    isOpen()
-    {
-        return this.isOpenValue;
-    }
-
-    on(event, callback)
-    {
-        MockSerialPort.events.push(event)
-        MockSerialPort.callbacks.set(event, callback)
-
-        if(event === 'open' && MockSerialPort.error === null )
-        {
-            callback()
-
-            this.isOpenValue = true
-        }
-        else if(event === 'error' && MockSerialPort.error !== null)
-        {
-            callback(MockSerialPort.error)
-        }
-    }
-
-    close() {
-        MockSerialPort.events.push('close')
-    }
-
-    static error = null
-    static ports = []
-    static events = []
-    static callbacks = {}
-    static expectedPort = null
-    static expectedOptions = null
-
-    static list(callback)
-    {
-        callback(this.error, this.ports)
-    }
-
-    static fireEvent(name, args)
-    {
-        if(this.callbacks.has(name))
-        {
-            this.callbacks.get(name)(args);
-        }
-    }
+    close(){}
 }
 
 describe('serial port wrapper', () => {
 
-    let serialport = null;
-    let wrapper = null;
-    let events = []
-    const dispatch = (x) => { events.push(x) }
+    let serialport = null
+    let wrapper = null
+    let mock = null
+    let dispatch
 
     beforeEach(() =>
     {
-        events = []
+        mock = sinon.sandbox.create();
 
-        serialport = MockSerialPort
-        serialport.error = null
-        serialport.ports = []
-        serialport.events = []
-        serialport.expectedPort = null
-        serialport.expectedOptions = null
-        serialport.callbacks = new Map()
+        dispatch = mock.spy()
+        
 
-        wrapper = new SerialPortWrapper(serialport)
+        serialport = mock.mock(serialportapi)
+
+        serialport.list = mock.stub()
+        serialport.create = mock.spy(() => serialport)
+        serialport.on = mock.stub()
+        serialport.isOpen = mock.stub()
+        serialport.close = mock.stub()
+
+        wrapper = new SerialPortWrapper(serialport, dispatch)
     })
 
     afterEach(() =>
     {
+        mock.restore();
         serialport = null
         wrapper = null;
     })
 
     it('should list zero ports', async () => {
-        const func = wrapper.list()
 
-        await func(dispatch);
+        serialport.list.callsArgWith(0, null, [])
 
-        events.should.be.deep.equal([
-            { type: 'LIST_SERIAL_PORTS' },
-            { type: 'RECEIVE_SERIAL_PORTS', ports: [] }])
+        await wrapper.list()
+
+        sinon.assert.calledWith(dispatch, { type: 'LIST_SERIAL_PORTS' })
+        sinon.assert.calledWith(dispatch, { type: 'RECEIVE_SERIAL_PORTS', ports: [] })
+        sinon.assert.callCount(dispatch, 2)
     })
 
     it('should list two ports', async () => {
-        serialport.ports = ['1', '2']
+        const error = new Error('an error')
+        serialport.list.callsArgWith(0, error, ['1', '2'])
 
-        const func = wrapper.list()
+        wrapper.list().should.eventually.be.rejected;
 
-        await func(dispatch);
-
-        events.should.be.deep.equal([
-            { type: 'LIST_SERIAL_PORTS' },
-            { type: 'RECEIVE_SERIAL_PORTS', ports: serialport.ports }])
-    })
-
-    it('should throw exception if serial port returned error', async () => {
-        serialport.error = 'an error'
-        serialport.ports = ['1', '2']
-
-        const func = wrapper.list()
-
-        let err = null
-        try
-        {
-            await func(dispatch)
-        }
-        catch (e)
-        {
-            err = e
-        }
-
-        chai.expect(err).is.equal('an error')
-
-        events.should.be.deep.equal([
-            { type: 'LIST_SERIAL_PORTS' },
-            { type: 'RECEIVE_SERIAL_PORTS', ports: [] },
-            { type: 'SET_ERROR', error: 'an error' }])
+        sinon.assert.calledWith(dispatch, { type: 'LIST_SERIAL_PORTS' })
+        sinon.assert.calledWith(dispatch, { type: 'RECEIVE_SERIAL_PORTS', ports: [] })
+        sinon.assert.calledWith(dispatch, { type: 'SET_ERROR', error: error })
+        sinon.assert.callCount(dispatch, 3)
     })
 
     it('should connect to provided port and update status', async () =>
     {
-        serialport.expectedPort = 'com1'
-        serialport.expectedOptions = {baudRate: wrapper.baudRate}
+        serialport.on.withArgs('open').callsArg(1);
 
-        const func = wrapper.connect({pnpId: serialport.expectedPort})
+        serialport.parser = 'parser'
 
-        await func(dispatch);
+        wrapper.connect({comName: 'COM1'})
 
-        serialport.events.should.be.deep.equal(['open', 'error'])
+        sinon.assert.calledWith(serialport.create, 'COM1', { baudRate: wrapper.baudRate, parser: serialport.parser })
 
-        events.should.be.deep.equal([
-            { type: 'UPDATE_CONNECTION_STATUS', connectionStatus: 'connecting' },
-            { type: 'UPDATE_CONNECTION_STATUS', connectionStatus: 'connected' }
-        ])
+        sinon.assert.calledWith(dispatch, { type: 'UPDATE_CONNECTION_STATUS', status: 'connecting' })
+        sinon.assert.calledWith(dispatch, { type: 'UPDATE_CONNECTION_STATUS', status: 'connected' })
+        sinon.assert.callCount(dispatch, 2)
+
+        sinon.assert.calledWith(serialport.on, 'open')
+        sinon.assert.calledWith(serialport.on, 'error')
+        sinon.assert.calledWith(serialport.on, 'data')
+        sinon.assert.callCount(serialport.on, 3)
     });
 
     it('should dispatch an error when connection failed and update status', async () =>
     {
-        serialport.error = 'connection error'
-        serialport.expectedPort = 'com1'
-        serialport.expectedOptions = {baudRate: wrapper.baudRate}
+        const error = new Error('an error')
 
-        const func = wrapper.connect({pnpId: 'com1'})
+        serialport.parser = 'parser'
+        serialport.on.withArgs('error').callsArgWith(1, error);
+        serialport.isOpen.returns(false)
 
-        await func(dispatch);
+        wrapper.connect({comName: 'COM1'})
 
-        serialport.events.should.be.deep.equal(['open', 'error'])
+        sinon.assert.calledWith(serialport.create, 'COM1', { baudRate: wrapper.baudRate, parser: serialport.parser })
 
-        events.should.be.deep.equal([
-            { type: 'UPDATE_CONNECTION_STATUS', connectionStatus: 'connecting' },
-            { type: 'UPDATE_CONNECTION_STATUS', connectionStatus: 'disconnected' },
-            { type: 'SET_ERROR', error: serialport.error }
-        ])
+        sinon.assert.calledWith(dispatch, { type: 'UPDATE_CONNECTION_STATUS', status: 'connecting' })
+        sinon.assert.calledWith(dispatch, { type: 'UPDATE_CONNECTION_STATUS', status: 'disconnected' })
+        sinon.assert.calledWith(dispatch, { type: 'SET_ERROR', error: error })
+        sinon.assert.callCount(dispatch, 3)
+
+        sinon.assert.calledWith(serialport.on, 'open')
+        sinon.assert.calledWith(serialport.on, 'error')
+        sinon.assert.calledWith(serialport.on, 'data')
+        sinon.assert.callCount(serialport.on, 3)
     });
 
     it('should disconnect and update status', async () =>
     {
-        serialport.expectedPort = 'com1'
-        serialport.expectedOptions = {baudRate: wrapper.baudRate}
+        wrapper.connect({comName: 'COM1'})
 
-        await  wrapper.connect({pnpId: 'com1'})(() => {})
+        serialport.isOpen.returns(true)
 
-        const func = wrapper.disconnect()
-        await func(dispatch);
+        wrapper.disconnect({comName: 'COM1'})
 
-        serialport.events.should.be.deep.equal(['open', 'error', 'close'])
-
-        events.should.be.deep.equal([
-            { type: 'UPDATE_CONNECTION_STATUS', connectionStatus: 'disconnected' }
-        ])
+        sinon.assert.calledOnce(serialport.close)
+        sinon.assert.calledWith(dispatch, { type: 'UPDATE_CONNECTION_STATUS', status: 'disconnected' })
     });
 
     it('should ignore disconnect if not connected', async () =>
     {
-        const func = wrapper.disconnect()
-        await func(dispatch);
+        wrapper.disconnect({comName: 'COM1'})
 
-        serialport.events.should.be.deep.equal([])
-
-        events.should.be.deep.equal([])
+        sinon.assert.notCalled(serialport.close)
+        sinon.assert.notCalled(dispatch)
     });
 
-    it('should disconnect if error occurred', async () =>
+    it('should disconnect and update status', async () =>
     {
-        serialport.expectedPort = 'com1'
-        serialport.expectedOptions = {baudRate: wrapper.baudRate}
+        wrapper.connect({comName: 'COM1'})
 
-        await wrapper.connect({pnpId: 'com1'})(dispatch)
+        serialport.isOpen.returns(true)
 
-        serialport.fireEvent('error', 'connection error')
+        wrapper.disconnect({comName: 'COM1'})
 
-        events.should.be.deep.equal([
-            { type: 'UPDATE_CONNECTION_STATUS', connectionStatus: 'connecting' },
-            { type: 'UPDATE_CONNECTION_STATUS', connectionStatus: 'connected' },
-            { type: 'UPDATE_CONNECTION_STATUS', connectionStatus: 'disconnected' },
-            { type: 'SET_ERROR', error: 'connection error' }
-        ])
+        sinon.assert.calledOnce(serialport.close)
+        sinon.assert.calledWith(dispatch, { type: 'UPDATE_CONNECTION_STATUS', status: 'disconnected' })
     });
+
+    it('should disconnect on an error', async () =>
+    {
+        const error = new Error('an error')
+
+        wrapper.connect({comName: 'COM1'})
+        serialport.isOpen.returns(false)
+
+        serialport.on.lastCall.args[1](error)
+
+        sinon.assert.notCalled(serialport.close)
+        sinon.assert.calledWith(dispatch, { type: 'UPDATE_CONNECTION_STATUS', status: 'disconnected' })
+        sinon.assert.calledWith(dispatch, { type: 'SET_ERROR', error: error })
+    })
 })

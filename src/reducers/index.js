@@ -1,10 +1,12 @@
 import { combineReducers } from 'redux'
 import logs from './logs'
-import serialPorts from './serialports'
+import ports from './ports'
+import connection from './connection'
 
 const serialPortApp = combineReducers({
   logs,
-  serialPorts
+  ports,
+  connection
 })
 
 export default serialPortApp

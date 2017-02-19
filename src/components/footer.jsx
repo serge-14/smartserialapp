@@ -3,6 +3,9 @@
 import { connect } from 'react-redux'
 import React, { Component, PropTypes } from 'react';
 import {Grid, FormControl, ButtonToolbar, InputGroup, Button, Navbar, DropdownButton, MenuItem, Panel, Row, ButtonGroup} from 'react-bootstrap';
+import {STATUS_CONNECTED, STATUS_DISCONNECTED} from '../reducers/connection';
+import { setBaudRate, clearLogs } from '../actions';
+
 
 class Footer extends Component {
 
@@ -15,30 +18,26 @@ class Footer extends Component {
 
   connect()
   {
-      this.dispatch(this.props.serialport.connect(this.props.serialPorts.activePort))
+      this.props.serialport.baudRate = this.props.rate;
+      this.props.serialport.connect(this.props.selected)
   }
 
   disconnect()
   {
-      this.dispatch(this.props.serialport.disconnect())
+      this.props.serialport.disconnect()
   }
 
-  render() {
-    return (
-    <Navbar fixedBottom fluid>
-        <Navbar.Header>
-        <Navbar.Brand>
-            Status: {this.props.serialPorts.status}
-        </Navbar.Brand>
-        <Navbar.Toggle />
-        </Navbar.Header>
-        <Navbar.Collapse>
-        <Navbar.Form pullRight>
-            <ButtonToolbar>
-            <ButtonGroup>
-                <Button onClick={this.connect.bind(this)}>Connect</Button>
-                <Button>Disconnect</Button>
-            </ButtonGroup>
+  setRate(rate)
+  {
+      this.dispatch(setBaudRate(rate))
+  }
+
+  clearAll()
+  {
+      this.dispatch(clearLogs())
+  }
+
+  /*
             <ButtonGroup>
                 <Button active>RTS</Button>
                 <Button>DTS</Button>
@@ -46,9 +45,30 @@ class Footer extends Component {
             <ButtonGroup>
                 <Button>Auto Connect</Button>
             </ButtonGroup>
-            <DropdownButton title="9600" id="bg-nested-dropdown">
-                <MenuItem eventKey="1">9600</MenuItem>
-                <MenuItem eventKey="2">115200</MenuItem>
+  */
+
+  render() {
+    return (
+    <Navbar fixedBottom fluid>
+        <Navbar.Header>
+        <Navbar.Brand>
+            Status: {this.props.status}
+        </Navbar.Brand>
+        <Navbar.Toggle />
+        </Navbar.Header>
+        <Navbar.Collapse>
+        <Navbar.Form pullRight>
+            <ButtonToolbar>
+            <ButtonGroup>
+                <Button disabled={this.props.selected == null || this.props.status != STATUS_DISCONNECTED} onClick={this.connect.bind(this)}>Connect</Button>
+                <Button disabled={this.props.status != STATUS_CONNECTED} onClick={this.disconnect.bind(this)}>Disconnect</Button>
+            </ButtonGroup>
+             <ButtonGroup>
+                <Button onClick={this.clearAll.bind(this)}>Clear</Button>
+            </ButtonGroup>
+            <DropdownButton title={this.props.rate} id="bg-nested-dropdown">
+                <MenuItem onClick={this.setRate.bind(this, 9600)} eventKey="1">9600</MenuItem>
+                <MenuItem onClick={this.setRate.bind(this, 115200)} eventKey="2">115200</MenuItem>
             </DropdownButton>
             </ButtonToolbar>
         </Navbar.Form>
@@ -59,22 +79,17 @@ class Footer extends Component {
 }
 
 Footer.propTypes = {
-  serialPorts: PropTypes.shape({
-    isFetching: PropTypes.bool.isRequired,
-    ports: PropTypes.arrayOf(PropTypes.shape({
-        comName: PropTypes.string.isRequired,
-        pnpId: PropTypes.string.isRequired
-    }).isRequired).isRequired,
-    activePort: PropTypes.shape({
+    selected: PropTypes.shape({
         comName: PropTypes.string.isRequired,
         pnpId: PropTypes.string.isRequired
     }),
     status: PropTypes.string.isRequired
-  }).isRequired
 }
 
 const mapStateToProps = (state) => ({
-  serialPorts: state.serialPorts
+  selected: state.connection.selectedPort,
+  status: state.connection.status,
+  rate: state.connection.baudRate
 })
 
 Footer = connect(

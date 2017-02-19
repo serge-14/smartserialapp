@@ -19,9 +19,9 @@ class Main extends Component {
     this.serialport = null
   }
 
-  componentDidMount()
+  async componentDidMount()
   {
-    this.dispatch(this.props.serialport.list())
+    await this.props.serialport.list()
   }
 
   render() {
@@ -30,7 +30,7 @@ class Main extends Component {
         <Header>
         </Header>
         <Grid fluid className="body">
-        <CommandInput className="body">
+        <CommandInput serialport={this.props.serialport} className="body">
         </CommandInput>
         <Logs>
         </Logs>

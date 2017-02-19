@@ -13,7 +13,7 @@ class Header extends Component {
   }
 
   getActiveSerialPortName(port) {
-      return port == null ? "Select" : port.comName;
+      return port == null ? "Select" : port.comName + ' (' + port.manufacturer + ')';
   }
 
   selectPort(port) {
@@ -21,29 +21,44 @@ class Header extends Component {
   }
 
   serialPorts() {
-    if(this.props.serialPorts.isFetching ) {
-        return (
-            <Navbar.Collapse className="test">
-                <Button disabled>Loading...</Button>
-            </Navbar.Collapse>
-        )
-    }
-    else if(!this.props.serialPorts.isFetching && this.props.serialPorts.ports.length == 0) {
+    if(this.props.fetching ) {
         return (
             <Navbar.Collapse className="test">
                 <Navbar.Form pullRight>
-                    <Button disabled>Not Available</Button>
+                    <Button disabled>Loading...</Button>
                 </Navbar.Form>
             </Navbar.Collapse>
         )
     }
-    else if(!this.props.serialPorts.isFetching && this.props.serialPorts.ports.length > 0) {
+    else if(!this.props.fetching && this.props.ports.length == 0) {
+        if(this.props.selected == null)
+        {
+            return (
+                <Navbar.Collapse className="test">
+                    <Navbar.Form pullRight>
+                        <Button disabled>Not available</Button>
+                    </Navbar.Form>
+                </Navbar.Collapse>
+            )
+        }
+        else
+        {
+            return (
+                <Navbar.Collapse className="test">
+                    <Navbar.Form pullRight>
+                        <Button disabled>{this.props.selected.comName} ({this.props.selected.manufacturer})</Button>
+                    </Navbar.Form>
+                </Navbar.Collapse>
+            )
+        }
+    }
+    else if(!this.props.fetching && this.props.ports.length > 0) {
         return (
             <Navbar.Collapse className="test">
                 <Navbar.Form pullRight>
-                    <DropdownButton bsStyle="default" title={this.getActiveSerialPortName(this.props.serialPorts.activePort)} id="communicationPort">
-                        {this.props.serialPorts.ports.map((port, index) =>
-                            <MenuItem key={index} eventKey={index} onClick={this.selectPort.bind(this, port)} >{port.comName}</MenuItem>
+                    <DropdownButton bsStyle="default" title={this.getActiveSerialPortName(this.props.selected)} id="communicationPort">
+                        {this.props.ports.map((port, index) =>
+                            <MenuItem key={index} eventKey={index} onClick={this.selectPort.bind(this, port)}>{port.comName} ({port.manufacturer})</MenuItem>
                         )}
                     </DropdownButton>
                 </Navbar.Form>
@@ -57,7 +72,7 @@ class Header extends Component {
     <Navbar fixedTop fluid>
         <Navbar.Header>
         <Navbar.Brand>
-            Serial Port
+            Smart Serial
         </Navbar.Brand>
         <Navbar.Toggle />
         </Navbar.Header>
@@ -68,21 +83,22 @@ class Header extends Component {
 }
 
 Header.propTypes = {
-  serialPorts: PropTypes.shape({
-    isFetching: PropTypes.bool.isRequired,
+    fetching: PropTypes.bool.isRequired,
     ports: PropTypes.arrayOf(PropTypes.shape({
         comName: PropTypes.string.isRequired,
+        manufacturer: PropTypes.string.isRequired,
         pnpId: PropTypes.string.isRequired
     }).isRequired).isRequired,
-    activePort: PropTypes.shape({
+    selected: PropTypes.shape({
         comName: PropTypes.string.isRequired,
         pnpId: PropTypes.string.isRequired
     })
-  }).isRequired
 }
 
 const mapStateToProps = (state) => ({
-  serialPorts: state.serialPorts
+    fetching: state.ports.fetching,
+    ports: state.ports.data,
+    selected: state.connection.selectedPort
 })
 
 Header = connect(

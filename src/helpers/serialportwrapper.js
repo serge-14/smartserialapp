@@ -1,88 +1,86 @@
-import { listSerialPorts, receiveSerialPorts, setError, updateConnectionStatus } from '../actions'
+import { listSerialPorts, receiveSerialPorts, setError, updateConnectionStatus, updateLogStatus, addLog } from '../actions'
 
 export class SerialPortWrapper
 {
-    constructor(serialport)
+    constructor(serialport, dispatch)
     {
         this.serialport = serialport;
+        this.dispatch = dispatch;
+
         this.baudRate = 9600;
         this.activePort = null;
     }
 
     connect(port)
     {
-        const _this = this;
+        this.dispatch(updateConnectionStatus('connecting'))
 
-        return function (dispatch) {
+        this.activePort = this.serialport.create(port.comName, {
+            baudRate: this.baudRate,
+            parser: this.serialport.parser
+        });
 
-            dispatch(updateConnectionStatus('connecting'))
+        this.activePort.on('open', () => {
+            this.dispatch(updateConnectionStatus('connected'))
+        });
 
-            _this.activePort = new _this.serialport(port.pnpId, {
-                baudRate: _this.baudRate
-            });
+        this.activePort.on('data', data => {
+            console.log(data)
+            this.dispatch(addLog(0, 0, data))
+        })
 
-            _this.activePort.on('open', function() {
-                dispatch(updateConnectionStatus('connected'))
-            });
-
-            _this.activePort.on('error', function(err) {
-                _this.disconnect()(dispatch);
-                dispatch(setError(err))
-            })
-        }
+        this.activePort.on('error', err => {
+            this.disconnect();
+            this.dispatch(setError(err))
+        })
     }
 
     disconnect()
     {
-        const _this = this;
+        if(this.activePort === null)
+        {
+            return;
+        }
 
-        return function (dispatch) {
+        this.dispatch(updateConnectionStatus('disconnected'))
 
-            if(_this.activePort === null)
-            {
-                return;
-            }
+        if(this.activePort.isOpen())
+        {
+            this.activePort.close()
+        }
+        this.activePort = null
+    }
 
-            dispatch(updateConnectionStatus('disconnected'))
-
-            return new Promise((resolve, reject) => 
-            {
-                if(_this.activePort.isOpen())
-                {
-                    _this.activePort.close()
-                }
-                _this.activePort = null
-
-                resolve()
-            })
+    write(content, callback)
+    {
+        if(this.activePort && this.activePort.isOpen())
+        {
+            this.activePort.write(content + '\r\n', () => this.activePort.drain(callback));
         }
     }
 
     list()
     {
-        const serialport = this.serialport;
+        this.dispatch(listSerialPorts())
 
-        return function (dispatch)
+        return new Promise((resolve, reject) => 
         {
-            dispatch(listSerialPorts())
-
-            return new Promise((resolve, reject) =>
+            this.serialport.list((err, ports) =>
             {
-                serialport.list((err, ports) =>
+                if(err !== null)
                 {
-                    if(err !== null)
-                    {
-                        dispatch(receiveSerialPorts([]))
-                        dispatch(setError(err))
-                        reject(err)
-                    }
-                    else
-                    {
-                        dispatch(receiveSerialPorts(ports))
-                        resolve();
-                    }
-                })
+                    this.dispatch(receiveSerialPorts([]))
+                    this.dispatch(setError(err))
+
+                    reject(err)
+                }
+                else
+                {
+                    this.dispatch(receiveSerialPorts(ports))
+                    
+                    resolve()
+                }
             })
-        }
+        });
     }
 }
