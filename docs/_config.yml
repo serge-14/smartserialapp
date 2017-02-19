@@ -1,4 +1,4 @@
-theme: jekyll-theme-cayman
+theme: jekyll-theme-minimal
 title: Smart Serial
 description: Simple application for communication with your Arduino or any other device over communication serial port.
 show_downloads: true
