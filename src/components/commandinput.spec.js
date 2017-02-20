@@ -11,13 +11,23 @@ import {SerialPortWrapper} from '../helpers/serialportwrapper';
 
 chai.should();
 
-describe('CommandInput', () => {
+function typeCommand(input, command)
+{
+    input.get(0).value = command
+    input.first().simulate('change')
+}
 
+describe('CommandInput', () =>
+{
     let mock
+    let store
+    let serialport
 
     beforeEach(() =>
     {
         mock = sinon.sandbox.create();
+        store = createStore(reducer)
+        serialport = mock.mock(new SerialPortWrapper(null, null))
     })
 
     afterEach(() =>
@@ -25,7 +35,7 @@ describe('CommandInput', () => {
         mock.restore();
     })
 
-    it('should have proper default state', () => {
+    it('should have proper set of components', () => {
         const wrapper = mount(<CommandInput/>)
 
         wrapper.find('InputGroup').should.have.length(1)
@@ -33,36 +43,155 @@ describe('CommandInput', () => {
         wrapper.find('.input-group-addon').should.have.length(1)
     })
 
-    it('should send simple command to serial port when enter pressed', () => {
-        const store = createStore(reducer)
-        
-        const serialport = mock.mock(new SerialPortWrapper(null, null))
-        serialport.expects('write').withArgs('enter_press?')
+    describe('send button', () =>
+    {
+        it('should send simple command to serial port when send button clicked', () => {
+            serialport.expects('write').withArgs('button_click?')
 
-        const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
-        
-        const input = wrapper.find('#command-text')
-        input.get(0).value = 'enter_press'
-        input.first().simulate('change')
-        input.simulate('keyPress', {charCode:13})
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
 
-        serialport.verify()
+            const input = wrapper.find('#command-text')
+            typeCommand(input, 'button_click')
+            
+            wrapper.find('#command-send').simulate('click')
+
+            serialport.verify()
+        })
     })
 
-    it('should send simple command to serial port when send button clicked', () => {
-        const store = createStore(reducer)
-        
-        const serialport = mock.mock(new SerialPortWrapper(null, null))
-        serialport.expects('write').withArgs('button_click?')
+    describe('handleKeyPress', () =>
+    {
+        it('should send simple command to serial port when enter pressed', () => 
+        {
+            serialport.expects('write').withArgs('enter_press?')
 
-        const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
-        
-        const input = wrapper.find('#command-text')
-        input.get(0).value = 'button_click'
-        input.first().simulate('change')
-        
-        wrapper.find('#command-send').simulate('click')
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+            
+            const input = wrapper.find('#command-text')
+            typeCommand(input, 'enter_press')
 
-        serialport.verify()
+            input.simulate('keyPress', {charCode:13})
+
+            serialport.verify()
+        })
+
+        it('should not send empty command', () => 
+        {
+
+        })
+
+        it('should send all parts even if input is empty', () => 
+        {
+
+        })
+
+        it('should send all parts and input value', () => 
+        {
+
+        })
+
+        it('should clear all commands and input after pressing clear button', () =>
+        {
+
+        })
+
+        it('should prevent default keyPress event handler when adding new part', () =>
+        {
+
+        })
+
+        it('should prevent default keyPress event handler when sending command', () =>
+        {
+
+        })
+
+        it('should split commands with spaces', () =>
+        {
+
+        })
+
+        it('should reset input value after adding new part', () =>
+        {
+
+        })
+
+        it('should split commands with spaces, and trim input string', () =>
+        {
+
+        })
+    })
+
+    describe('handleKeyDown', () =>
+    {
+        it('should remove last command with backspace', () =>
+        {
+
+        })
+
+        it('should not remove last command with backspace if input is not empty', () =>
+        {
+
+        })
+
+        it('should prevent default keyDown event handler when removing last part', () =>
+        {
+
+        })
+    })
+
+    describe('text', () =>
+    {
+        it('should clear state', () =>
+        {
+
+        })
+
+        it('should clear state when button clicked', () =>
+        {
+
+        })
+
+        it('should update text value in state', () =>
+        {
+
+        })
+    })
+
+    describe("send", () =>
+    {
+        it('should write all parts', () =>
+        {
+
+        })
+
+        it('should write all parts and input value', () =>
+        {
+
+        })
+
+        it('should write only input value', () =>
+        {
+
+        })
+
+        it('should add ? in the end of command', () =>
+        {
+
+        })
+
+        it('should dispatch addLog', () =>
+        {
+
+        })
+
+        it('should dispatch message status', () =>
+        {
+
+        })
+
+        it('should clear state', () =>
+        {
+
+        })
     })
 })

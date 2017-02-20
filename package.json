@@ -1,22 +1,23 @@
 {
   "name": "serial-port",
   "version": "1.0.0",
-  "description": "Smart Serial Port application",
-  "main": "./src/es6-init.js",
+  "description": "Simple application for communication with your Arduino or any other device over communication serial port.",
+  "main": "./src/main.js",
   "scripts": {
     "start": "node_modules/.bin/electron .",
     "pack": "build --dir",
     "dist": "build",
     "rebuild": "electron-rebuild -f -w serialport",
-    "test": "mocha --compilers js:babel-core/register --require babel-register --require babel-core/register --require babel-polyfill ./src/**/*.spec.js",
-    "test:file": "mocha test/browser.js --compilers js:babel-core/register --require babel-register --require babel-core/register --require babel-polyfill",
+    "coverage": "babel-node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha ./src/**/*.spec.js",
+    "test": "mocha --require babel-polyfill ./src/**/*.spec.js",
+    "test:file": "mocha --require babel-polyfill",
     "package-win32": "electron-packager-compile --arch x64 --asar --electron-version 1.4.15 --platform win32 --icon assets/icon.ico --overwrite --out=release-builds ."
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Sergey Yanchi",
+  "license": "MIT",
   "dependencies": {
     "babel-preset-react": "^6.23.0",
-    "electron-compile": "^5.1.3",
+    "electron-compile": "^6.0.0",
     "electron-config": "^0.2.1",
     "react-bootstrap": "^0.30.7",
     "react-desktop": "^0.2.17",
@@ -28,23 +29,26 @@
     "serialport": "^4.0.7"
   },
   "devDependencies": {
+    "babel-cli": "^6.23.0",
     "babel-core": "^6.22.1",
     "babel-loader": "^6.2.10",
     "babel-polyfill": "^6.22.0",
     "babel-preset-es2015": "^6.22.0",
     "babel-preset-stage-0": "^6.22.0",
-    "babel-register": "^6.22.0",
+    "babel-register": "^6.23.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
-    "electron-compilers": "^5.4.0",
+    "electron-compilers": "^5.5.1",
     "electron-installer-dmg": "^0.2.0",
     "electron-packager": "^8.5.1",
-    "electron-prebuilt-compile": "^1.4.15",
+    "electron-prebuilt-compile": "1.4.15",
     "electron-rebuild": "^1.5.7",
     "electron-winstaller": "^2.5.2",
     "enzyme": "^2.7.1",
+    "istanbul": "^1.0.0-alpha",
     "jsdom": "^9.11.0",
     "mocha": "^3.2.0",
+    "mocha-lcov-reporter": "^1.2.0",
     "mocha-sinon": "^1.1.6",
     "react": "^15.4.2",
     "react-addons-test-utils": "^15.4.2",
@@ -55,5 +59,14 @@
   "build": {
     "appId": "me.sergeyyanchi.smartserialapp"
   },
-  "postinstall": "install-app-deps"
+  "postinstall": "install-app-deps",
+  "config": {
+    "blanket": {
+      "pattern": "src",
+      "data-cover-never": [
+        "node_modules",
+        "*.spec.js"
+      ]
+    }
+  }
 }

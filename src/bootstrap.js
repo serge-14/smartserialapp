@@ -18,7 +18,7 @@ const enhancer = compose(
         thunkMiddleware,
         loggerMiddleware
   ),
-  persistState(/*paths, config*/),
+  persistState()
 )
 
 const store = createStore(
@@ -26,7 +26,12 @@ const store = createStore(
     enhancer
 )
 
-const serialPortWrapper = new SerialPortWrapper({create: (p,o) => new serialport(p, o), parser: serialport.parsers.readline('\n'), list: (x) => serialport.list(x)}, store.dispatch)
+const serialPortWrapper = new SerialPortWrapper(
+  {
+    create: (p,o) => new serialport(p, o),
+    parser: serialport.parsers.readline('\n'),
+    list: (x) => serialport.list(x)
+  }, store.dispatch)
 
 store.dispatch(resetConnection())
 
