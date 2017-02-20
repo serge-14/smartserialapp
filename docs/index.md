@@ -30,6 +30,3 @@ Linux 64-bit (deb package) - [here]()
 # Credits
 
 Icons made by [Prosymbols](http://www.flaticon.com/authors/prosymbols) from [www.flaticon.com](http://www.flaticon.com") is licensed by [CC 3.0 BY](http://creativecommons.org/licenses/by/3.0/)
-
-
-test> C:\Projects\apps\smartserialapp>"./node_modules/.bin/babel-node" ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha
