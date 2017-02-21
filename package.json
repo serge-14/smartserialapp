@@ -12,7 +12,8 @@
     "test": "mocha --require babel-polyfill ./src/**/*.spec.js",
     "test:file": "mocha --require babel-polyfill",
     "package-win32": "electron-packager-compile --arch x64 --asar --electron-version 1.4.15 --platform win32 --icon assets/icon.ico --prune=true --overwrite --out=release-builds .",
-    "package-mac": "electron-packager-compile . --overwrite --asar --platform=darwin --arch=x64 --icon=assets/icon.icns --prune=true --out=release-builds"
+    "package-mac": "electron-packager-compile . --overwrite --asar --platform=darwin --arch=x64 --icon=assets/icon.icns --prune=true --overwrite --out=release-builds",
+    "package-linux" : "electron-packager . --overwrite --asar --platform=linux --arch=x64 --icon=assets/icon-512.png --prune=true --overwrite --out=release-builds"
   },
   "author": "Sergey Yanchi",
   "license": "MIT",
