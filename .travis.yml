@@ -25,10 +25,11 @@ install:
 - nvm install 6
 - npm install
 script:
+- npm run coverage
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then npm run package-linux; npm run package-mac; fi
 branches:
   only:
   - master
 
 after_success:
-- npm run coverage
+- npm run coveralls

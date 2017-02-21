@@ -3,7 +3,7 @@
 import React, { Component, PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import { ListGroup } from 'react-bootstrap';
-import Log from './Log'
+import Log from './log'
 
 class LogContainer extends Component {
 
