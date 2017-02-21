@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/serge-14/gelflib.svg?branch=master)](https://travis-ci.org/serge-14/gelflib) 
+[![Build Status](https://travis-ci.org/serge-14/smartserialapp.svg?branch=master)](https://travis-ci.org/serge-14/smartserialapp)
 
 # Smart Serial
 

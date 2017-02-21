@@ -28,8 +28,7 @@ install:
 - npm install
 - npm prune
 script:
-- npm run package-win32
-- npm run package-osx
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then npm run package-linux; npm run package-mac; fi
 branches:
   only:
   - master
