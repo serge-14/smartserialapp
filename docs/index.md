@@ -17,6 +17,7 @@ Linux 64-bit (deb package) - [here]()
 # Feature plan
 
  * Setup CI
+ * Setup deployment
  * Improve unit test coverage
  * Support for DTS and RTS modes
  * RPC to control application (IDE can ask application to connect/disconnect)

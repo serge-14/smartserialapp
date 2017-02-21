@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/serge-14/smartserialapp.svg?branch=master)](https://travis-ci.org/serge-14/smartserialapp)
+[![Build Status](https://travis-ci.org/serge-14/smartserialapp.svg?branch=master)](https://travis-ci.org/serge-14/smartserialapp) [![Build status](https://ci.appveyor.com/api/projects/status/fyptx9hah8al7ojj?svg=true)](https://ci.appveyor.com/project/serge-14/smartserialapp)
 
 # Smart Serial
 
