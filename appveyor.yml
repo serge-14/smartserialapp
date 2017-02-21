@@ -13,5 +13,7 @@ install:
 test: off
 deploy: off
 
-build:
+build: on
+
+build_script:
   - npm run package-win32
