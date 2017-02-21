@@ -6,7 +6,7 @@ layout: default
 
 <img src="cpu.png" data-canonical-src="cpu.png" width="64" height="64" />
 
-# Download
+# Download (coming soon)
 
 Windows 64-bit (installer) - [here]()
 
