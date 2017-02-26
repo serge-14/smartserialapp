@@ -1,5 +1,6 @@
 'use strict';
 
+import { connect } from 'react-redux'
 import React, { Component, PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import { ListGroup } from 'react-bootstrap';
@@ -44,4 +45,8 @@ LogContainer.propTypes = {
   }).isRequired).isRequired
 }
 
-export default LogContainer
+const mapStateToProps = (state) => ({
+  logs: state.logs
+})
+
+export default connect(mapStateToProps)(LogContainer)

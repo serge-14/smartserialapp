@@ -11,9 +11,22 @@ install:
   - npm install
 
 test: off
-deploy: off
-
 build: on
 
 build_script:
   - npm run package-win32
+  - 7z a %APPVEYOR_BUILD_FOLDER%\release-builds\serial-port-win32-x64.zip %APPVEYOR_BUILD_FOLDER%\release-builds\serial-port-win32-x64
+
+artifacts:
+  - path: release-builds\serial-port-win32-x64.zip
+    name: serial-port-win32-x64
+
+deploy:
+  description: 'Smart Serial App'
+  provider: GitHub
+  auth_token:
+    secure: Q/TIrScPACJv5ynVQdeHjc/4Rzgb9VjjAtFSmtwOkoO7jrljTLvgiJjpGcOfGJ/2
+  artifact: serial-port-win32-x64
+  on:
+    branch: master
+    appveyor_repo_tag: true

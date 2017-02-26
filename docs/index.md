@@ -8,11 +8,7 @@ layout: default
 
 # Download (coming soon)
 
-Windows 64-bit (installer) - [here]()
-
-macOS 64-bit (dmg package) - [here]()
-
-Linux 64-bit (deb package) - [here]()
+Latest release [here](https://github.com/serge-14/smartserialapp/releases/latest).
 
 # Feature plan
 

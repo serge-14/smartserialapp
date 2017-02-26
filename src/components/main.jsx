@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import CommandInput from './commandinput';
 import Header from './header';
 import Footer from './footer';
-import Logs from '../containers/logs'
+import Logs from './logcontainer'
 import {Grid, FormControl, ButtonToolbar, InputGroup, Button, Navbar, DropdownButton, MenuItem, Panel, Row, ButtonGroup} from 'react-bootstrap';
 
 
