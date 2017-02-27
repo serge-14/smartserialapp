@@ -38,6 +38,8 @@ describe('serial port wrapper', () => {
         serialport.on = mock.stub()
         serialport.isOpen = mock.stub()
         serialport.close = mock.stub()
+        serialport.write = mock.stub()
+        serialport.drain = mock.stub()
 
         wrapper = new SerialPortWrapper(serialport, dispatch)
     })
@@ -159,5 +161,34 @@ describe('serial port wrapper', () => {
         sinon.assert.notCalled(serialport.close)
         sinon.assert.calledWith(dispatch, { type: 'UPDATE_CONNECTION_STATUS', status: 'disconnected' })
         sinon.assert.calledWith(dispatch, { type: 'SET_ERROR', error: 'an error' })
+    })
+
+    it('should send log when data received', async () =>
+    {
+        wrapper.connect({comName: 'COM1'})
+        serialport.isOpen.returns(true)
+
+        serialport.on.secondCall.args[1]('test message')
+
+        sinon.assert.notCalled(serialport.close)
+        sinon.assert.calledWith(dispatch, { type: 'ADD_LOG', id: 0, direction: 0, content: 'test message' })
+    })
+
+    it('should write message', async () =>
+    {
+        serialport.write.callsArgWith(1)
+        serialport.drain.callsArgWith(0)
+
+        wrapper.connect({comName: 'COM1'})
+        serialport.isOpen.returns(true)
+
+        const callback = mock.spy()
+
+        wrapper.write('hello there!', callback)
+
+        sinon.assert.notCalled(serialport.close)
+        sinon.assert.calledWith(serialport.write, 'hello there!\r\n')
+        sinon.assert.calledOnce(serialport.drain)
+        sinon.assert.calledOnce(callback)
     })
 })

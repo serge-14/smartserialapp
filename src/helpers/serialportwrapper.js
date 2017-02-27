@@ -25,7 +25,6 @@ export class SerialPortWrapper
         });
 
         this.activePort.on('data', data => {
-            console.log(data)
             this.dispatch(addLog(0, 0, data))
         })
 
