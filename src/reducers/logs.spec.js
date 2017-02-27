@@ -18,6 +18,10 @@ describe('logs reducer', () => {
         logs(undefined,{}).should.be.deep.equal([])
     })
 
+    it('no action, keeps same state', () => {
+        logs(['item_1', 'item_2'],{}).should.be.deep.equal(['item_1', 'item_2'])
+    })
+
     it('should handle ADD_LOG', () => {
         logs([], {
             type: 'ADD_LOG',

@@ -49,7 +49,7 @@ const logs = (state = [], action) => {
     case UPDATE_LOG_STATUS:
       return state.map(x => log(x, action))
     default:
-      return state
+      return state.map(x => log(x, {}))
   }
 }
 
