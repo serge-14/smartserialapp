@@ -19,9 +19,11 @@ export class CommandInput extends Component {
     handleKeyPress(event) {
         var key = event.keyCode || event.charCode;
 
-        if(key == 32 && this.state.text.trim().length != 0) {
+        const trimmed = this.state.text.trim()
+
+        if(key == 32 && trimmed.length != 0) {
             this.setState({ 
-                parts: this.state.parts.concat([this.state.text]),
+                parts: this.state.parts.concat([trimmed]),
                 text: ''
             })
             
@@ -29,7 +31,7 @@ export class CommandInput extends Component {
         }
         else if(event.charCode == 13) {
 
-            if(this.state.parts.length > 0 || this.state.text != '')
+            if(this.state.parts.length > 0 || trimmed != '')
             {
                 this.send();
                 event.preventDefault()
@@ -39,11 +41,13 @@ export class CommandInput extends Component {
 
     send()
     {
-        if(this.state.parts.length > 0 || this.state.text != '')
+        const trimmed = this.state.text.trim()
+
+        if(this.state.parts.length > 0 || trimmed != '')
         {
-            if(this.state.text.length != 0)
+            if(trimmed.length != 0)
             {
-                this.state.parts.push(this.state.text)
+                this.state.parts.push(trimmed)
             }
 
             const message = this.state.parts.join(' ') + '?';

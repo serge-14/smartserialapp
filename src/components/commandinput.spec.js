@@ -52,7 +52,7 @@ describe('CommandInput', () =>
 
             const input = wrapper.find('#command-text')
             typeCommand(input, 'button_click')
-            
+
             wrapper.find('#command-send').simulate('click')
 
             serialport.verify()
@@ -77,47 +77,160 @@ describe('CommandInput', () =>
 
         it('should not send empty command', () => 
         {
+            serialport.expects('write').never()
 
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+            
+            const input = wrapper.find('#command-text')
+            typeCommand(input, '')
+
+            input.simulate('keyPress', {charCode:13})
+
+            serialport.verify()
         })
 
         it('should send all parts even if input is empty', () => 
         {
+            serialport.expects('write').withArgs('enter press?')
 
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+            
+            const input = wrapper.find('#command-text')
+            
+            typeCommand(input, 'enter')
+            input.simulate('keyPress', {charCode:32})
+
+            typeCommand(input, 'press')
+            input.simulate('keyPress', {charCode:32})
+
+            typeCommand(input, '')
+
+            input.simulate('keyPress', {charCode:13})
+
+            serialport.verify()
         })
 
         it('should send all parts and input value', () => 
         {
+            serialport.expects('write').withArgs('enter press yeah?')
 
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+            
+            const input = wrapper.find('#command-text')
+            
+            typeCommand(input, 'enter')
+            input.simulate('keyPress', {charCode:32})
+
+            typeCommand(input, 'press')
+            input.simulate('keyPress', {charCode:32})
+
+            typeCommand(input, 'yeah')
+
+            input.simulate('keyPress', {charCode:13})
+
+            serialport.verify()
         })
 
-        it('should clear all commands and input after pressing clear button', () =>
+        it('should do nothing on other presses', () => 
         {
+            serialport.expects('write').never()
 
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+            
+            const input = wrapper.find('#command-text')
+
+            let preventDefault = mock.stub()
+
+            input.simulate('keyPress', {charCode:12, preventDefault:preventDefault})
+
+            sinon.assert.notCalled(preventDefault)
+            serialport.verify()
         })
 
         it('should prevent default keyPress event handler when adding new part', () =>
         {
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
 
+            const input = wrapper.find('#command-text')
+            typeCommand(input, 'enter_press')
+
+            let preventDefault = mock.stub()
+
+            input.simulate('keyPress', {charCode:32, preventDefault:preventDefault})
+
+            sinon.assert.calledOnce(preventDefault)
         })
 
         it('should prevent default keyPress event handler when sending command', () =>
         {
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
 
-        })
+            const input = wrapper.find('#command-text')
+            typeCommand(input, 'enter_press')
 
-        it('should split commands with spaces', () =>
-        {
+            let preventDefault = mock.stub()
 
+            input.simulate('keyPress', {charCode:13, preventDefault:preventDefault})
+
+            sinon.assert.calledOnce(preventDefault)
         })
 
         it('should reset input value after adding new part', () =>
         {
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+            
+            const input = wrapper.find('#command-text')
+            
+            typeCommand(input, 'enter')
 
+            input.get(0).value.should.not.be.equal('')
+
+            input.simulate('keyPress', {charCode:32})
+
+            input.get(0).value.should.be.equal('')
         })
 
-        it('should split commands with spaces, and trim input string', () =>
+        it('should trim input with space', () =>
         {
+            serialport.expects('write').withArgs('button_click?')
 
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+
+            const input = wrapper.find('#command-text')
+            typeCommand(input, '   button_click   ')
+            input.simulate('keyPress', {charCode:32})
+
+            wrapper.find('#command-send').simulate('click')
+
+            serialport.verify()
+        })
+
+        it('should trim input string when clicking a button', () =>
+        {
+            serialport.expects('write').withArgs('button_click?')
+
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+
+            const input = wrapper.find('#command-text')
+            typeCommand(input, '   button_click   ')
+
+            wrapper.find('#command-send').simulate('click')
+
+            serialport.verify()
+        })
+
+        it('should split trim input string when clicking a with enter', () => 
+        {
+            serialport.expects('write').withArgs('enter_press?')
+
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+            
+            const input = wrapper.find('#command-text')
+            typeCommand(input, '   enter_press    ')
+
+            input.simulate('keyPress', {charCode:13})
+
+            serialport.verify()
         })
     })
 
