@@ -57,6 +57,63 @@ describe('CommandInput', () =>
 
             serialport.verify()
         })
+
+        it('should send empty', () => {
+            serialport.expects('write').never()
+
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+
+            wrapper.find('#command-send').simulate('click')
+
+            serialport.verify()
+        })
+
+        it('should send simple command to serial port and handle status', () => {
+            serialport.object.write = mock.stub()
+            serialport.object.write.callsArg(1)
+
+            store.dispatch = mock.stub()
+
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+
+            const input = wrapper.find('#command-text')
+            typeCommand(input, 'button_click')
+
+            wrapper.find('#command-send').simulate('click')
+            
+            sinon.assert.calledOnce(serialport.object.write)
+            sinon.assert.calledWith(store.dispatch, { type: 'UPDATE_LOG_STATUS', id: 1, status: 1 })
+        })
+
+        it('should send simple command to serial port and handle status with error', () => {
+            serialport.object.write = mock.stub()
+            serialport.object.write.callsArgWith(1, new Error('error'))
+
+            store.dispatch = mock.stub()
+
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+
+            const input = wrapper.find('#command-text')
+            typeCommand(input, 'button_click')
+
+            wrapper.find('#command-send').simulate('click')
+            
+            sinon.assert.calledOnce(serialport.object.write)
+            sinon.assert.calledWith(store.dispatch, { type: 'UPDATE_LOG_STATUS', id: 1, status: 2 })
+        })
+
+        it('should send simple command to serial port and add log', () => {
+            store.dispatch = mock.stub()
+
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+
+            const input = wrapper.find('#command-text')
+            typeCommand(input, 'button_click')
+
+            wrapper.find('#command-send').simulate('click')
+            
+            sinon.assert.calledWith(store.dispatch, { type: 'ADD_LOG', direction: 1, id: 1, content: 'button_click?' })
+        })
     })
 
     describe('handleKeyPress', () =>
@@ -236,19 +293,107 @@ describe('CommandInput', () =>
 
     describe('handleKeyDown', () =>
     {
-        it('should remove last command with backspace', () =>
+        it('should remove last command with backspace, key code 8', () =>
         {
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
 
+            const input = wrapper.find('#command-text')
+            const commandInput = wrapper.find('CommandInput')
+
+            commandInput.get(0).state.parts.push('hello')
+
+            input.simulate('keyDown', {charCode:8})
+
+            commandInput.get(0).state.parts.should.be.empty
+        })
+
+        it('should remove last command with backspace, key code 46', () =>
+        {
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+
+            const input = wrapper.find('#command-text')
+            const commandInput = wrapper.find('CommandInput')
+
+            commandInput.get(0).state.parts.push('hello')
+
+            input.simulate('keyDown', {charCode:46})
+
+            commandInput.get(0).state.parts.should.be.empty
+        })
+
+        it('should not remove last command with backspace, key code 13', () =>
+        {
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+
+            const input = wrapper.find('#command-text')
+            const commandInput = wrapper.find('CommandInput')
+
+            commandInput.get(0).state.parts.push('not_removed')
+
+            input.simulate('keyDown', {charCode:13})
+
+            commandInput.get(0).state.parts.should.be.deep.equal(['not_removed'])
         })
 
         it('should not remove last command with backspace if input is not empty', () =>
         {
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
 
+            const input = wrapper.find('#command-text')
+            const commandInput = wrapper.find('CommandInput')
+
+            commandInput.get(0).state.parts.push('not_removed')
+
+            typeCommand(input, 'c')
+            input.simulate('keyDown', {charCode:46})
+
+            commandInput.get(0).state.parts.should.be.deep.equal(['not_removed'])
         })
 
         it('should prevent default keyDown event handler when removing last part', () =>
         {
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
 
+            const input = wrapper.find('#command-text')
+            const commandInput = wrapper.find('CommandInput')
+
+            commandInput.get(0).state.parts.push('not_removed')
+
+            let preventDefault = mock.stub()
+
+            input.simulate('keyDown', {charCode:46, preventDefault:preventDefault})
+
+            sinon.assert.calledOnce(preventDefault)
+        })
+
+        it('should not prevent default keyDown event handler, wrong key', () =>
+        {
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+
+            const input = wrapper.find('#command-text')
+            const commandInput = wrapper.find('CommandInput')
+
+            commandInput.get(0).state.parts.push('not_removed')
+
+            let preventDefault = mock.stub()
+
+            input.simulate('keyDown', {charCode:15, preventDefault:preventDefault})
+
+            sinon.assert.notCalled(preventDefault)
+        })
+
+        it('should not prevent default keyDown event handler, no parts', () =>
+        {
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
+
+            const input = wrapper.find('#command-text')
+            const commandInput = wrapper.find('CommandInput')
+
+            let preventDefault = mock.stub()
+
+            input.simulate('keyDown', {charCode:8, preventDefault:preventDefault})
+
+            sinon.assert.notCalled(preventDefault)
         })
     })
 
@@ -256,55 +401,31 @@ describe('CommandInput', () =>
     {
         it('should clear state', () =>
         {
+            const wrapper = mount(<CommandInput/>)
 
+            wrapper.get(0).state.parts.push('not_removed')
+            wrapper.get(0).state.text = 'state'
+
+            wrapper.get(0).clear()
+
+            wrapper.get(0).state.parts.should.be.empty
+            wrapper.get(0).state.text.should.be.empty
         })
 
         it('should clear state when button clicked', () =>
         {
+            const wrapper = mount(<Provider store={store}><ConnectedCommandInput serialport={serialport.object}/></Provider>)
 
-        })
+            const clear = wrapper.find('#command-clear')
+            const commandInput = wrapper.find('CommandInput')
 
-        it('should update text value in state', () =>
-        {
+            commandInput.get(0).state.parts.push('not_removed')
+            commandInput.get(0).state.text = 'state'
 
-        })
-    })
+            clear.simulate('click')
 
-    describe("send", () =>
-    {
-        it('should write all parts', () =>
-        {
-
-        })
-
-        it('should write all parts and input value', () =>
-        {
-
-        })
-
-        it('should write only input value', () =>
-        {
-
-        })
-
-        it('should add ? in the end of command', () =>
-        {
-
-        })
-
-        it('should dispatch addLog', () =>
-        {
-
-        })
-
-        it('should dispatch message status', () =>
-        {
-
-        })
-
-        it('should clear state', () =>
-        {
-
+            commandInput.get(0).state.parts.should.be.empty
+            commandInput.get(0).state.text.should.be.empty
         })
     })
 })

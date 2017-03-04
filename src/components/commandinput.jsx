@@ -75,7 +75,7 @@ export class CommandInput extends Component {
      handleKeyDown(event) {
         var key = event.keyCode || event.charCode;
 
-        if( (key == 8 || key == 46) && this.state.text == '' )
+        if( (key == 8 || key == 46) && this.state.text == '' && this.state.parts.length != 0 )
         {
             this.state.parts.pop()
 
@@ -103,7 +103,7 @@ export class CommandInput extends Component {
                 <FormControl id="command-text" type="text" value={this.state.text} onChange={this.handleChange.bind(this)} onKeyPress={this.handleKeyPress.bind(this)} onKeyDown={this.handleKeyDown.bind(this)} />
                 <InputGroup.Button>
                     <Button id="command-send" onClick={this.send.bind(this)}>Send</Button>
-                    <Button onClick={this.clear.bind(this)}>Clean</Button>
+                    <Button id="command-clear" onClick={this.clear.bind(this)}>Clean</Button>
                 </InputGroup.Button>
             </InputGroup>
         );
